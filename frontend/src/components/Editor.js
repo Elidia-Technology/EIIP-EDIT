@@ -78,11 +78,21 @@ export default function Editor() {
     link.click();
   };
 
+  // Helper function to update canvas after EIIP operation
+  const updateCanvas = () => {
+    if (!canvasRef.current || !eiip) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    ctx.putImageData(imageData, 0, 0);
+  };
+
   // EIIP Functions
   const handleResize = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.resize(resizeWidth, resizeHeight);
+      updateCanvas();
       console.log(`Resized to ${resizeWidth}x${resizeHeight}`);
     } catch (error) {
       console.error('Resize error:', error);
@@ -90,9 +100,10 @@ export default function Editor() {
   };
 
   const handleRotate = (angle) => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.rotate(angle || rotateAngle);
+      updateCanvas();
       console.log(`Rotated by ${angle || rotateAngle} degrees`);
     } catch (error) {
       console.error('Rotate error:', error);
@@ -100,9 +111,10 @@ export default function Editor() {
   };
 
   const handleFlip = (direction) => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.flip(direction);
+      updateCanvas();
       console.log(`Flipped ${direction}`);
     } catch (error) {
       console.error('Flip error:', error);
@@ -110,9 +122,10 @@ export default function Editor() {
   };
 
   const handleCrop = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.crop(cropX, cropY, cropWidth, cropHeight);
+      updateCanvas();
       console.log(`Cropped: x=${cropX}, y=${cropY}, w=${cropWidth}, h=${cropHeight}`);
     } catch (error) {
       console.error('Crop error:', error);
@@ -120,9 +133,10 @@ export default function Editor() {
   };
 
   const handleBrightness = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.brightness(brightness);
+      updateCanvas();
       console.log(`Brightness adjusted: ${brightness}`);
     } catch (error) {
       console.error('Brightness error:', error);
@@ -130,9 +144,10 @@ export default function Editor() {
   };
 
   const handleContrast = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.contrast(contrast);
+      updateCanvas();
       console.log(`Contrast adjusted: ${contrast}`);
     } catch (error) {
       console.error('Contrast error:', error);
@@ -140,9 +155,10 @@ export default function Editor() {
   };
 
   const handleSaturation = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.saturation(saturation);
+      updateCanvas();
       console.log(`Saturation adjusted: ${saturation}`);
     } catch (error) {
       console.error('Saturation error:', error);
@@ -150,9 +166,10 @@ export default function Editor() {
   };
 
   const handleBlur = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.blur(blurAmount);
+      updateCanvas();
       console.log(`Blur applied: ${blurAmount}`);
     } catch (error) {
       console.error('Blur error:', error);
@@ -160,9 +177,10 @@ export default function Editor() {
   };
 
   const handleGrayscale = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.grayscale();
+      updateCanvas();
       console.log('Grayscale applied');
     } catch (error) {
       console.error('Grayscale error:', error);
@@ -170,9 +188,10 @@ export default function Editor() {
   };
 
   const handleInvert = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.invert();
+      updateCanvas();
       console.log('Invert applied');
     } catch (error) {
       console.error('Invert error:', error);
@@ -180,9 +199,10 @@ export default function Editor() {
   };
 
   const handleSepia = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.sepia();
+      updateCanvas();
       console.log('Sepia applied');
     } catch (error) {
       console.error('Sepia error:', error);
@@ -190,12 +210,13 @@ export default function Editor() {
   };
 
   const handleWatermark = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       eiip.watermark(watermarkText, 50, 50, {
         font: '30px Arial',
         color: 'rgba(255, 255, 255, 0.5)',
       });
+      updateCanvas();
       console.log(`Watermark added: ${watermarkText}`);
     } catch (error) {
       console.error('Watermark error:', error);
@@ -203,12 +224,41 @@ export default function Editor() {
   };
 
   const handleCompress = () => {
-    if (!eiip) return;
+    if (!eiip || !canvasRef.current) return;
     try {
       const compressed = eiip.compress(compressionQuality);
       console.log(`Compressed with quality: ${compressionQuality}`, compressed);
+      // Compression returns base64 data URL, we can display it
+      if (compressed) {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          const eiipInstance = new EIIP(canvas);
+          setEiip(eiipInstance);
+        };
+        img.src = compressed;
+      }
     } catch (error) {
       console.error('Compress error:', error);
+    }
+  };
+
+  const handleConvert = (format) => {
+    if (!canvasRef.current) return;
+    try {
+      const canvas = canvasRef.current;
+      const dataURL = canvas.toDataURL(`image/${format}`, format === 'jpeg' ? 0.9 : undefined);
+      const link = document.createElement('a');
+      link.download = `converted-image.${format}`;
+      link.href = dataURL;
+      link.click();
+      console.log(`Converted and downloaded as ${format}`);
+    } catch (error) {
+      console.error('Convert error:', error);
     }
   };
 
@@ -379,6 +429,18 @@ export default function Editor() {
           </div>
         );
 
+      case 'convert':
+        return (
+          <div className={panelClass}>
+            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Convert Format</h3>
+            <div className="space-y-3">
+              <button onClick={() => handleConvert('png')} className={btnClass}>Convert to PNG</button>
+              <button onClick={() => handleConvert('jpeg')} className={btnSecondaryClass}>Convert to JPEG</button>
+              <button onClick={() => handleConvert('webp')} className={btnSecondaryClass}>Convert to WebP</button>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -474,6 +536,7 @@ export default function Editor() {
                   { id: 'blur', icon: '💫', label: 'Blur' },
                   { id: 'watermark', icon: '📝', label: 'Watermark' },
                   { id: 'compress', icon: '🗜️', label: 'Compress' },
+                  { id: 'convert', icon: '🔄', label: 'Convert Format' },
                 ].map((tool) => (
                   <button
                     key={tool.id}
