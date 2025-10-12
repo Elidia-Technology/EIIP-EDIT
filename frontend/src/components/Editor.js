@@ -359,26 +359,30 @@ export default function Editor() {
   const renderToolPanel = () => {
     if (!selectedTool) return null;
 
-    const panelClass = `bg-${theme === 'dark' ? 'gray-800' : 'white'} p-6 rounded-lg shadow-xl`;
-    const inputClass = `w-full px-4 py-2 rounded-lg border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`;
-    const btnClass = `w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105`;
-    const btnSecondaryClass = `w-full px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold`;
+    const panelClass = `${panelBgClass} rounded panel-border`;
+    const inputClass = `w-full px-3 py-2 rounded bg-[#2a2a2a] border border-[#4a4a4a] text-white text-sm focus:outline-none focus:border-[#0078d4] transition-colors`;
+    const labelClass = `block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide`;
+    const btnClass = `w-full px-4 py-2.5 bg-[#0078d4] text-white rounded hover:bg-[#0066b8] transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed`;
+    const btnSecondaryClass = `w-full px-4 py-2.5 bg-[#4a4a4a] text-white rounded hover:bg-[#5a5a5a] transition-all text-sm font-medium`;
+    const sectionClass = `mb-4 pb-4 border-b border-[#4a4a4a] last:border-0`;
 
     switch (selectedTool) {
       case 'resize':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Resize Image</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Image Size</h3>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Width</label>
+              <div className={sectionClass}>
+                <label className={labelClass}>Width (px)</label>
                 <input type="number" value={resizeWidth} onChange={(e) => setResizeWidth(Number(e.target.value))} className={inputClass} />
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Height</label>
+              <div className={sectionClass}>
+                <label className={labelClass}>Height (px)</label>
                 <input type="number" value={resizeHeight} onChange={(e) => setResizeHeight(Number(e.target.value))} className={inputClass} />
               </div>
-              <button onClick={handleResize} className={btnClass}>Apply Resize</button>
+              <button onClick={handleResize} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Apply'}
+              </button>
             </div>
           </div>
         );
@@ -386,16 +390,20 @@ export default function Editor() {
       case 'rotate':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Rotate Image</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Rotate Image</h3>
             <div className="space-y-3">
-              <button onClick={() => handleRotate(90)} className={btnClass}>Rotate 90°</button>
-              <button onClick={() => handleRotate(180)} className={btnSecondaryClass}>Rotate 180°</button>
-              <button onClick={() => handleRotate(270)} className={btnSecondaryClass}>Rotate 270°</button>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Custom Angle</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => handleRotate(90)} className={btnSecondaryClass} disabled={processing}>90°</button>
+                <button onClick={() => handleRotate(180)} className={btnSecondaryClass} disabled={processing}>180°</button>
+                <button onClick={() => handleRotate(270)} className={btnSecondaryClass} disabled={processing}>270°</button>
+              </div>
+              <div className={sectionClass}>
+                <label className={labelClass}>Custom Angle (degrees)</label>
                 <input type="number" value={rotateAngle} onChange={(e) => setRotateAngle(Number(e.target.value))} className={inputClass} />
               </div>
-              <button onClick={handleRotate} className={btnSecondaryClass}>Apply Custom</button>
+              <button onClick={handleRotate} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Apply Custom'}
+              </button>
             </div>
           </div>
         );
@@ -403,10 +411,14 @@ export default function Editor() {
       case 'flip':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Flip Image</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Flip Image</h3>
             <div className="space-y-3">
-              <button onClick={() => handleFlip('horizontal')} className={btnClass}>Flip Horizontal</button>
-              <button onClick={() => handleFlip('vertical')} className={btnSecondaryClass}>Flip Vertical</button>
+              <button onClick={() => handleFlip('horizontal')} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Flip Horizontal ↔'}
+              </button>
+              <button onClick={() => handleFlip('vertical')} className={btnSecondaryClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Flip Vertical ↕'}
+              </button>
             </div>
           </div>
         );
@@ -414,25 +426,27 @@ export default function Editor() {
       case 'crop':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Crop Image</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Crop Image</h3>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2">X Position</label>
+              <div className={sectionClass}>
+                <label className={labelClass}>X Position</label>
                 <input type="number" value={cropX} onChange={(e) => setCropX(Number(e.target.value))} className={inputClass} />
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Y Position</label>
+              <div className={sectionClass}>
+                <label className={labelClass}>Y Position</label>
                 <input type="number" value={cropY} onChange={(e) => setCropY(Number(e.target.value))} className={inputClass} />
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Width</label>
+              <div className={sectionClass}>
+                <label className={labelClass}>Width</label>
                 <input type="number" value={cropWidth} onChange={(e) => setCropWidth(Number(e.target.value))} className={inputClass} />
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Height</label>
+              <div className={sectionClass}>
+                <label className={labelClass}>Height</label>
                 <input type="number" value={cropHeight} onChange={(e) => setCropHeight(Number(e.target.value))} className={inputClass} />
               </div>
-              <button onClick={handleCrop} className={btnClass}>Apply Crop</button>
+              <button onClick={handleCrop} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Apply Crop'}
+              </button>
             </div>
           </div>
         );
@@ -440,22 +454,22 @@ export default function Editor() {
       case 'adjust':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Adjust Colors</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Adjustments</h3>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Brightness: {brightness}</label>
-                <input type="range" value={brightness} onChange={(e) => setBrightness(Number(e.target.value))} min="-100" max="100" className="w-full" />
+              <div className={sectionClass}>
+                <label className={labelClass}>Brightness: {brightness}</label>
+                <input type="range" value={brightness} onChange={(e) => setBrightness(Number(e.target.value))} min="-100" max="100" className="w-full h-2 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer accent-[#0078d4]" />
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Contrast: {contrast}</label>
-                <input type="range" value={contrast} onChange={(e) => setContrast(Number(e.target.value))} min="-100" max="100" className="w-full" />
+              <div className={sectionClass}>
+                <label className={labelClass}>Contrast: {contrast}</label>
+                <input type="range" value={contrast} onChange={(e) => setContrast(Number(e.target.value))} min="-100" max="100" className="w-full h-2 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer accent-[#0078d4]" />
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Saturation: {saturation}</label>
-                <input type="range" value={saturation} onChange={(e) => setSaturation(Number(e.target.value))} min="-100" max="100" className="w-full" />
+              <div className={sectionClass}>
+                <label className={labelClass}>Saturation: {saturation}</label>
+                <input type="range" value={saturation} onChange={(e) => setSaturation(Number(e.target.value))} min="-100" max="100" className="w-full h-2 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer accent-[#0078d4]" />
               </div>
-              <button onClick={handleAdjustColors} className={`${btnClass} mt-4`} disabled={processing}>
-                {processing ? 'Processing...' : 'Apply All Adjustments'}
+              <button onClick={handleAdjustColors} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Apply Adjustments'}
               </button>
             </div>
           </div>
@@ -464,11 +478,17 @@ export default function Editor() {
       case 'filters':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Filters</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Filter Gallery</h3>
             <div className="space-y-3">
-              <button onClick={handleGrayscale} className={btnClass}>Grayscale</button>
-              <button onClick={handleSepia} className={btnSecondaryClass}>Sepia</button>
-              <button onClick={handleInvert} className={btnSecondaryClass}>Invert</button>
+              <button onClick={handleGrayscale} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Grayscale'}
+              </button>
+              <button onClick={handleSepia} className={btnSecondaryClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Sepia Tone'}
+              </button>
+              <button onClick={handleInvert} className={btnSecondaryClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Invert Colors'}
+              </button>
             </div>
           </div>
         );
@@ -476,11 +496,15 @@ export default function Editor() {
       case 'blur':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Blur Effect</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Blur</h3>
             <div className="space-y-4">
-              <label className="block text-sm font-semibold mb-2">Blur Amount: {blurAmount}</label>
-              <input type="range" value={blurAmount} onChange={(e) => setBlurAmount(Number(e.target.value))} min="1" max="20" className="w-full" />
-              <button onClick={handleBlur} className={btnClass}>Apply Blur</button>
+              <div className={sectionClass}>
+                <label className={labelClass}>Amount: {blurAmount}</label>
+                <input type="range" value={blurAmount} onChange={(e) => setBlurAmount(Number(e.target.value))} min="1" max="20" className="w-full h-2 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer accent-[#0078d4]" />
+              </div>
+              <button onClick={handleBlur} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Apply Blur'}
+              </button>
             </div>
           </div>
         );
@@ -488,13 +512,15 @@ export default function Editor() {
       case 'watermark':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Add Watermark</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Text Overlay</h3>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Watermark Text</label>
-                <input type="text" value={watermarkText} onChange={(e) => setWatermarkText(e.target.value)} className={inputClass} />
+              <div className={sectionClass}>
+                <label className={labelClass}>Text Content</label>
+                <input type="text" value={watermarkText} onChange={(e) => setWatermarkText(e.target.value)} className={inputClass} placeholder="Enter text..." />
               </div>
-              <button onClick={handleWatermark} className={btnClass}>Add Watermark</button>
+              <button onClick={handleWatermark} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Add Text'}
+              </button>
             </div>
           </div>
         );
@@ -502,11 +528,15 @@ export default function Editor() {
       case 'compress':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Compress Image</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Optimize Image</h3>
             <div className="space-y-4">
-              <label className="block text-sm font-semibold mb-2">Quality: {compressionQuality.toFixed(1)}</label>
-              <input type="range" value={compressionQuality} onChange={(e) => setCompressionQuality(Number(e.target.value))} min="0.1" max="1" step="0.1" className="w-full" />
-              <button onClick={handleCompress} className={btnClass}>Compress</button>
+              <div className={sectionClass}>
+                <label className={labelClass}>Quality: {(compressionQuality * 100).toFixed(0)}%</label>
+                <input type="range" value={compressionQuality} onChange={(e) => setCompressionQuality(Number(e.target.value))} min="0.1" max="1" step="0.1" className="w-full h-2 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer accent-[#0078d4]" />
+              </div>
+              <button onClick={handleCompress} className={btnClass} disabled={processing}>
+                {processing ? 'Processing...' : 'Compress'}
+              </button>
             </div>
           </div>
         );
@@ -514,11 +544,11 @@ export default function Editor() {
       case 'convert':
         return (
           <div className={panelClass}>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Convert Format</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-200 uppercase tracking-wide border-b border-[#4a4a4a] pb-2">Export As</h3>
             <div className="space-y-3">
-              <button onClick={() => handleConvert('png')} className={btnClass}>Convert to PNG</button>
-              <button onClick={() => handleConvert('jpeg')} className={btnSecondaryClass}>Convert to JPEG</button>
-              <button onClick={() => handleConvert('webp')} className={btnSecondaryClass}>Convert to WebP</button>
+              <button onClick={() => handleConvert('png')} className={btnClass}>PNG</button>
+              <button onClick={() => handleConvert('jpeg')} className={btnSecondaryClass}>JPEG</button>
+              <button onClick={() => handleConvert('webp')} className={btnSecondaryClass}>WebP</button>
             </div>
           </div>
         );
@@ -528,56 +558,65 @@ export default function Editor() {
     }
   };
 
-  const bgClass = theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900';
-  const sidebarBgClass = theme === 'dark' ? 'bg-gray-800' : 'bg-white';
-  const headerBgClass = theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
+  const bgClass = theme === 'dark' ? 'bg-[#2a2a2a] text-white' : 'bg-gray-50 text-gray-900';
+  const sidebarBgClass = theme === 'dark' ? 'bg-[#323232]' : 'bg-white';
+  const headerBgClass = theme === 'dark' ? 'bg-[#323232] border-[#1a1a1a]' : 'bg-white border-gray-200';
+  const panelBgClass = theme === 'dark' ? 'bg-[#3a3a3a]' : 'bg-white';
+  const toolPanelBg = theme === 'dark' ? 'bg-[#2e2e2e]' : 'bg-gray-50';
 
   return (
-    <div {...getRootProps()} className={`h-screen flex flex-col ${bgClass}`}>
-      {/* Header */}
-      <header className={`${headerBgClass} border-b shadow-lg`}>
-        <div className="flex items-center justify-between px-6 py-4">
+    <div {...getRootProps()} className={`h-screen flex flex-col ${bgClass} select-none`}>
+      {/* Photoshop-style Header/Menu Bar */}
+      <header className={`${headerBgClass} border-b panel-border`}>
+        <div className="flex items-center justify-between px-4 py-2">
           <div className="flex items-center space-x-4">
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)} 
-              className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
+              className={`p-2 rounded hover:bg-[#4a4a4a] transition-colors ${sidebarOpen ? 'bg-[#4a4a4a]' : ''}`}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              EIIP Image Editor
-            </h1>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center font-bold text-white text-sm">
+                EI
+              </div>
+              <h1 className="text-lg font-semibold tracking-tight">
+                EIIP Editor
+              </h1>
+            </div>
           </div>
           
-          <div className="flex items-center space-x-3">
+          {/* Center - File menu style */}
+          <div className="flex items-center space-x-1 text-sm">
+            <button className="px-3 py-1 hover:bg-[#4a4a4a] rounded transition-colors">File</button>
+            <button className="px-3 py-1 hover:bg-[#4a4a4a] rounded transition-colors">Edit</button>
+            <button className="px-3 py-1 hover:bg-[#4a4a4a] rounded transition-colors">Image</button>
+            <button className="px-3 py-1 hover:bg-[#4a4a4a] rounded transition-colors">Filter</button>
+            <button className="px-3 py-1 hover:bg-[#4a4a4a] rounded transition-colors">View</button>
+          </div>
+          
+          <div className="flex items-center space-x-2">
             {currentImageURL && (
-              <span className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold">
-                {canvasRef.current?.width || 0} × {canvasRef.current?.height || 0}
+              <span className="px-3 py-1 bg-[#4a4a4a] text-white rounded text-xs font-mono">
+                {canvasRef.current?.width || 0} × {canvasRef.current?.height || 0} px
               </span>
             )}
             
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
+              className="p-2 rounded hover:bg-[#4a4a4a] transition-colors"
+              title="Toggle theme"
             >
-              {theme === 'dark' ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
+              {theme === 'dark' ? '☀️' : '🌙'}
             </button>
             
             <button 
               onClick={handleUploadClick}
-              className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="px-4 py-1.5 bg-[#0078d4] text-white rounded hover:bg-[#0066b8] transition-all text-sm font-medium"
             >
-              {isDragActive ? '📁 Drop image...' : '📤 Upload'}
+              {isDragActive ? '📁 Drop...' : 'Open'}
             </button>
             <input id="file-input" {...getInputProps()} style={{ display: 'none' }} />
             
@@ -586,16 +625,16 @@ export default function Editor() {
                 <button 
                   onClick={handleReset}
                   disabled={processing}
-                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 bg-[#4a4a4a] text-white rounded hover:bg-[#5a5a5a] transition-all text-sm disabled:opacity-50"
                 >
-                  🔄 Reset
+                  Reset
                 </button>
                 <button 
                   onClick={handleDownload}
                   disabled={processing}
-                  className="px-6 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 bg-[#0078d4] text-white rounded hover:bg-[#0066b8] transition-all text-sm disabled:opacity-50"
                 >
-                  💾 Download
+                  Save
                 </button>
               </>
             )}
@@ -604,78 +643,92 @@ export default function Editor() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
+        {/* Photoshop-style Tools Panel (Left Sidebar) */}
         {sidebarOpen && (
-          <aside className={`${sidebarBgClass} w-64 border-r ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} overflow-y-auto shadow-xl`}>
-            <div className="p-4">
-              <h2 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Tools</h2>
-              <div className="space-y-2">
-                {[
-                  { id: 'resize', icon: '📐', label: 'Resize' },
-                  { id: 'rotate', icon: '🔄', label: 'Rotate' },
-                  { id: 'flip', icon: '🔃', label: 'Flip' },
-                  { id: 'crop', icon: '✂️', label: 'Crop' },
-                  { id: 'adjust', icon: '🎨', label: 'Adjust Colors' },
-                  { id: 'filters', icon: '✨', label: 'Filters' },
-                  { id: 'blur', icon: '💫', label: 'Blur' },
-                  { id: 'watermark', icon: '📝', label: 'Watermark' },
-                  { id: 'compress', icon: '🗜️', label: 'Compress' },
-                  { id: 'convert', icon: '🔄', label: 'Convert Format' },
-                ].map((tool) => (
-                  <button
-                    key={tool.id}
-                    onClick={() => { setSelectedTool(tool.id); setSidebarOpen(false); }}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 font-semibold ${
-                      selectedTool === tool.id 
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105' 
-                        : `${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`
-                    }`}
-                  >
-                    <span className="mr-2">{tool.icon}</span>
-                    {tool.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <aside className={`${sidebarBgClass} w-16 border-r border-[#1a1a1a] panel-border flex flex-col items-center py-3 space-y-1`}>
+            {[
+              { id: 'resize', icon: '↔️', label: 'Resize', shortcut: 'R' },
+              { id: 'rotate', icon: '🔄', label: 'Rotate', shortcut: 'T' },
+              { id: 'flip', icon: '🔃', label: 'Flip', shortcut: 'F' },
+              { id: 'crop', icon: '✂️', label: 'Crop', shortcut: 'C' },
+              { id: 'adjust', icon: '🎨', label: 'Adjust', shortcut: 'A' },
+              { id: 'filters', icon: '✨', label: 'Filters', shortcut: 'E' },
+              { id: 'blur', icon: '💫', label: 'Blur', shortcut: 'B' },
+              { id: 'watermark', icon: '📝', label: 'Text', shortcut: 'W' },
+              { id: 'compress', icon: '🗜️', label: 'Compress', shortcut: 'K' },
+              { id: 'convert', icon: '�', label: 'Convert', shortcut: 'S' },
+            ].map((tool) => (
+              <button
+                key={tool.id}
+                onClick={() => setSelectedTool(selectedTool === tool.id ? null : tool.id)}
+                className={`w-12 h-12 rounded flex flex-col items-center justify-center transition-all group relative ${
+                  selectedTool === tool.id 
+                    ? 'tool-active text-white' 
+                    : 'hover:bg-[#4a4a4a] text-gray-300'
+                }`}
+                title={`${tool.label} (${tool.shortcut})`}
+              >
+                <span className="text-lg">{tool.icon}</span>
+                <span className="text-[9px] mt-0.5 opacity-70">{tool.shortcut}</span>
+                
+                {/* Tooltip */}
+                <div className="absolute left-full ml-2 px-2 py-1 bg-[#1a1a1a] text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                  {tool.label}
+                </div>
+              </button>
+            ))}
           </aside>
         )}
 
-        {/* Tool Panel */}
+        {/* Properties/Options Panel (Right Side) */}
         {selectedTool && (
-          <div className="w-80 p-6 overflow-y-auto border-r border-gray-700">
-            {renderToolPanel()}
+          <div className={`${toolPanelBg} w-72 border-r border-[#1a1a1a] panel-border overflow-y-auto`}>
+            <div className="p-4">
+              {renderToolPanel()}
+            </div>
           </div>
         )}
 
-        {/* Canvas Area */}
-        <main className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        {/* Canvas Area with Photoshop-style Grid Background */}
+        <main className="flex-1 flex items-center justify-center p-6 canvas-grid-bg relative overflow-hidden">
           {!currentImageURL ? (
-            <div className="text-center">
+            <div className="text-center z-10">
               <div className="mb-6">
-                <svg className="w-32 h-32 mx-auto text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                <svg className="w-24 h-24 mx-auto text-gray-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold text-gray-300 mb-3">
-                Drop Your Image Here
+              <h2 className="text-2xl font-semibold text-gray-400 mb-2">
+                No Image Loaded
               </h2>
-              <p className="text-gray-500 text-lg">
-                or click the Upload button to get started
+              <p className="text-gray-500 text-sm mb-4">
+                Drag and drop an image here or click Open
               </p>
+              <button 
+                onClick={handleUploadClick}
+                className="px-6 py-2 bg-[#0078d4] text-white rounded hover:bg-[#0066b8] transition-all text-sm font-medium"
+              >
+                Choose Image
+              </button>
             </div>
           ) : null}
           
           {processing && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 text-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
-                <p className="text-xl font-semibold text-gray-800">Processing...</p>
+            <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
+              <div className="bg-[#2a2a2a] rounded-lg p-8 text-center panel-border">
+                <div className="relative w-16 h-16 mx-auto mb-4">
+                  <div className="absolute inset-0 border-4 border-[#4a4a4a] border-t-[#0078d4] rounded-full animate-spin"></div>
+                </div>
+                <p className="text-lg font-semibold text-gray-200">Processing Image...</p>
+                <p className="text-xs text-gray-400 mt-1">Please wait</p>
               </div>
             </div>
           )}
           
-          <div className={`max-w-full max-h-full shadow-2xl rounded-lg overflow-hidden ${!currentImageURL ? 'hidden' : ''}`}>
-            <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
+          <div className={`${!currentImageURL ? 'hidden' : ''} max-w-full max-h-full flex items-center justify-center`}>
+            <div className="canvas-checkerboard rounded shadow-2xl p-4 inline-block">
+              <canvas ref={canvasRef} className="max-w-full max-h-full shadow-lg" style={{ maxHeight: 'calc(100vh - 200px)' }} />
+            </div>
           </div>
         </main>
       </div>
