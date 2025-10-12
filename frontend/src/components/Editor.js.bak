@@ -1058,6 +1058,39 @@ export default function Editor() {
             ))}
           </aside>
         )}
+            {[
+              { id: 'resize', icon: '↔️', label: 'Resize', shortcut: 'R' },
+              { id: 'rotate', icon: '🔄', label: 'Rotate', shortcut: 'T' },
+              { id: 'flip', icon: '🔃', label: 'Flip', shortcut: 'F' },
+              { id: 'crop', icon: '✂️', label: 'Crop', shortcut: 'C' },
+              { id: 'adjust', icon: '🎨', label: 'Adjust', shortcut: 'A' },
+              { id: 'filters', icon: '✨', label: 'Filters', shortcut: 'E' },
+              { id: 'blur', icon: '💫', label: 'Blur', shortcut: 'B' },
+              { id: 'watermark', icon: '📝', label: 'Text', shortcut: 'W' },
+              { id: 'compress', icon: '🗜️', label: 'Compress', shortcut: 'K' },
+              { id: 'convert', icon: '�', label: 'Convert', shortcut: 'S' },
+            ].map((tool) => (
+              <button
+                key={tool.id}
+                onClick={() => setSelectedTool(selectedTool === tool.id ? null : tool.id)}
+                className={`w-12 h-12 rounded flex flex-col items-center justify-center transition-all group relative ${
+                  selectedTool === tool.id 
+                    ? 'tool-active text-white' 
+                    : 'hover:bg-[#4a4a4a] text-gray-300'
+                }`}
+                title={`${tool.label} (${tool.shortcut})`}
+              >
+                <span className="text-lg">{tool.icon}</span>
+                <span className="text-[9px] mt-0.5 opacity-70">{tool.shortcut}</span>
+                
+                {/* Tooltip */}
+                <div className="absolute left-full ml-2 px-2 py-1 bg-[#1a1a1a] text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                  {tool.label}
+                </div>
+              </button>
+            ))}
+          </aside>
+        )}
 
         {/* Properties/Options Panel (Right Side) */}
         {selectedTool && (
