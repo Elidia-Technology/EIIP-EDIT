@@ -32,6 +32,11 @@ export default function Editor() {
     reader.onload = (e) => {
       const img = new window.Image();
       img.onload = () => {
+        if (!canvasRef.current) {
+          console.error('Canvas ref is not available');
+          return;
+        }
+        
         setImage(img);
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -511,11 +516,11 @@ export default function Editor() {
                 or click the Upload button to get started
               </p>
             </div>
-          ) : (
-            <div className="max-w-full max-h-full shadow-2xl rounded-lg overflow-hidden">
-              <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
-            </div>
-          )}
+          ) : null}
+          
+          <div className={`max-w-full max-h-full shadow-2xl rounded-lg overflow-hidden ${!image ? 'hidden' : ''}`}>
+            <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
+          </div>
         </main>
       </div>
     </div>
