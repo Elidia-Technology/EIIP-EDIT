@@ -1017,8 +1017,10 @@ export default function Editor() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Photoshop-style Tools Panel (Left Sidebar) */}
-        {sidebarOpen && (
-                <div className="flex flex-1 overflow-hidden">
+        {/* {sidebarOpen && 
+        (
+                <div className="flex flex-1 overflow-hidden"></div>
+                  )} */}
         {/* Photoshop-style Tools Panel (Left Sidebar) */}
         {sidebarOpen && (
           <aside className={`${sidebarBgClass} w-16 border-r border-[#1a1a1a] panel-border flex flex-col items-center py-3 space-y-1 overflow-y-auto`}>
@@ -1090,37 +1092,39 @@ export default function Editor() {
                 Choose Image
               </button>
             </div>
-          ) : null}
-          
-          {processing && (
-            <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
-              <div className="bg-[#2a2a2a] rounded-lg p-8 text-center panel-border">
-                <div className="relative w-16 h-16 mx-auto mb-4">
-                  <div className="absolute inset-0 border-4 border-[#4a4a4a] border-t-[#0078d4] rounded-full animate-spin"></div>
+          ) : (
+            <>
+              {processing && (
+                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
+                  <div className="bg-[#2a2a2a] rounded-lg p-8 text-center panel-border">
+                    <div className="relative w-16 h-16 mx-auto mb-4">
+                      <div className="absolute inset-0 border-4 border-[#4a4a4a] border-t-[#0078d4] rounded-full animate-spin"></div>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-200">Processing Image...</p>
+                    <p className="text-xs text-gray-400 mt-1">Please wait</p>
+                  </div>
                 </div>
-                <p className="text-lg font-semibold text-gray-200">Processing Image...</p>
-                <p className="text-xs text-gray-400 mt-1">Please wait</p>
+              )}
+              
+              <div className="max-w-full max-h-full flex items-center justify-center">
+                <div className="canvas-checkerboard rounded shadow-2xl p-4 inline-block">
+                  <canvas 
+                    ref={canvasRef} 
+                    className="max-w-full max-h-full shadow-lg cursor-crosshair" 
+                    style={{ maxHeight: 'calc(100vh - 200px)' }}
+                    onMouseDown={handleCanvasMouseDown}
+                    onMouseMove={handleCanvasMouseMove}
+                    onMouseUp={handleCanvasMouseUp}
+                  />
+                </div>
+                {cropMode && (
+                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-[#0078d4] text-white px-4 py-2 rounded shadow-lg text-sm font-medium">
+                    🖱️ Drag on the image to select crop area
+                  </div>
+                )}
               </div>
-            </div>
+            </>
           )}
-          
-          <div className={`${!currentImageURL ? 'hidden' : ''} max-w-full max-h-full flex items-center justify-center`}>
-            <div className="canvas-checkerboard rounded shadow-2xl p-4 inline-block">
-              <canvas 
-                ref={canvasRef} 
-                className="max-w-full max-h-full shadow-lg cursor-crosshair" 
-                style={{ maxHeight: 'calc(100vh - 200px)' }}
-                onMouseDown={handleCanvasMouseDown}
-                onMouseMove={handleCanvasMouseMove}
-                onMouseUp={handleCanvasMouseUp}
-              />
-            </div>
-            {cropMode && (
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-[#0078d4] text-white px-4 py-2 rounded shadow-lg text-sm font-medium">
-                🖱️ Drag on the image to select crop area
-              </div>
-            )}
-          </div>
         </main>
       </div>
     </div>
