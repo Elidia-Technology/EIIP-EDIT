@@ -2,10 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Box, AppBar, Toolbar, IconButton, Typography, Button } from '@mui/material';
 import { Brightness4, Brightness7, CloudUpload, Download } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
-
-// Placeholder for EIIP import
-// TODO: Copy eiip.js or eiip.min.js from the EIIP library package
-// import EIIP from './eiip';
+import EIIP from 'eiip';
 
 const canvasStyle = {
   width: '100vw',
@@ -17,6 +14,7 @@ const canvasStyle = {
 export default function Editor({ theme, setTheme }) {
   const canvasRef = useRef(null);
   const [image, setImage] = useState(null);
+  const [eiip, setEiip] = useState(null);
 
   const onDrop = React.useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -32,8 +30,10 @@ export default function Editor({ theme, setTheme }) {
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
         
-        // TODO: Initialize EIIP with the canvas
-        // const eiip = new EIIP(canvas);
+        // Initialize EIIP with the canvas
+        const eiipInstance = new EIIP(canvas);
+        setEiip(eiipInstance);
+        console.log('EIIP initialized successfully!');
       };
       img.src = e.target.result;
     };
