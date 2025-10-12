@@ -4,11 +4,14 @@ import EIIP from 'eiip';
 
 export default function Editor() {
   const canvasRef = useRef(null);
-  const [image, setImage] = useState(null);
-  const [eiip, setEiip] = useState(null);
+  const [currentImageFile, setCurrentImageFile] = useState(null);
+  const [currentImageURL, setCurrentImageURL] = useState(null);
+  const [originalFile, setOriginalFile] = useState(null);
+  const [eiip] = useState(() => new EIIP({ debug: true }));
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedTool, setSelectedTool] = useState(null);
   const [theme, setTheme] = useState('dark');
+  const [processing, setProcessing] = useState(false);
   
   // Tool parameters
   const [resizeWidth, setResizeWidth] = useState(800);
@@ -25,36 +28,40 @@ export default function Editor() {
   const [cropWidth, setCropWidth] = useState(400);
   const [cropHeight, setCropHeight] = useState(400);
 
+  const displayImageOnCanvas = (dataUrl) => {
+    if (!canvasRef.current) return;
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      
+      setResizeWidth(img.width);
+      setResizeHeight(img.height);
+      setCropWidth(Math.min(400, img.width));
+      setCropHeight(Math.min(400, img.height));
+      setCropX(0);
+      setCropY(0);
+    };
+    img.src = dataUrl;
+  };
+
   const onDrop = React.useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     if (!file) return;
+    
+    // Store original file
+    setOriginalFile(file);
+    setCurrentImageFile(file);
+    
+    // Display image
     const reader = new FileReader();
     reader.onload = (e) => {
-      const img = new window.Image();
-      img.onload = () => {
-        if (!canvasRef.current) {
-          console.error('Canvas ref is not available');
-          return;
-        }
-        
-        setImage(img);
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        
-        const eiipInstance = new EIIP(canvas);
-        setEiip(eiipInstance);
-        
-        setResizeWidth(img.width);
-        setResizeHeight(img.height);
-        setCropWidth(Math.min(400, img.width));
-        setCropHeight(Math.min(400, img.height));
-        
-        console.log('EIIP initialized successfully!');
-      };
-      img.src = e.target.result;
+      setCurrentImageURL(e.target.result);
+      displayImageOnCanvas(e.target.result);
+      console.log('✅ Image loaded successfully!');
     };
     reader.readAsDataURL(file);
   }, []);
@@ -71,179 +78,252 @@ export default function Editor() {
   };
 
   const handleDownload = () => {
+    if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const link = document.createElement('a');
     link.download = 'edited-image.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
+    console.log('✅ Image downloaded');
   };
 
-  // Helper function to update canvas after EIIP operation
-  const updateCanvas = () => {
-    if (!canvasRef.current || !eiip) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    ctx.putImageData(imageData, 0, 0);
-  };
-
-  // EIIP Functions
-  const handleResize = () => {
-    if (!eiip || !canvasRef.current) return;
+  // EIIP-based Image Processing Functions (all async)
+  const handleResize = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
     try {
-      eiip.resize(resizeWidth, resizeHeight);
-      updateCanvas();
-      console.log(`Resized to ${resizeWidth}x${resizeHeight}`);
-    } catch (error) {
-      console.error('Resize error:', error);
-    }
-  };
-
-  const handleRotate = (angle) => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.rotate(angle || rotateAngle);
-      updateCanvas();
-      console.log(`Rotated by ${angle || rotateAngle} degrees`);
-    } catch (error) {
-      console.error('Rotate error:', error);
-    }
-  };
-
-  const handleFlip = (direction) => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.flip(direction);
-      updateCanvas();
-      console.log(`Flipped ${direction}`);
-    } catch (error) {
-      console.error('Flip error:', error);
-    }
-  };
-
-  const handleCrop = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.crop(cropX, cropY, cropWidth, cropHeight);
-      updateCanvas();
-      console.log(`Cropped: x=${cropX}, y=${cropY}, w=${cropWidth}, h=${cropHeight}`);
-    } catch (error) {
-      console.error('Crop error:', error);
-    }
-  };
-
-  const handleBrightness = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.brightness(brightness);
-      updateCanvas();
-      console.log(`Brightness adjusted: ${brightness}`);
-    } catch (error) {
-      console.error('Brightness error:', error);
-    }
-  };
-
-  const handleContrast = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.contrast(contrast);
-      updateCanvas();
-      console.log(`Contrast adjusted: ${contrast}`);
-    } catch (error) {
-      console.error('Contrast error:', error);
-    }
-  };
-
-  const handleSaturation = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.saturation(saturation);
-      updateCanvas();
-      console.log(`Saturation adjusted: ${saturation}`);
-    } catch (error) {
-      console.error('Saturation error:', error);
-    }
-  };
-
-  const handleBlur = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.blur(blurAmount);
-      updateCanvas();
-      console.log(`Blur applied: ${blurAmount}`);
-    } catch (error) {
-      console.error('Blur error:', error);
-    }
-  };
-
-  const handleGrayscale = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.grayscale();
-      updateCanvas();
-      console.log('Grayscale applied');
-    } catch (error) {
-      console.error('Grayscale error:', error);
-    }
-  };
-
-  const handleInvert = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.invert();
-      updateCanvas();
-      console.log('Invert applied');
-    } catch (error) {
-      console.error('Invert error:', error);
-    }
-  };
-
-  const handleSepia = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.sepia();
-      updateCanvas();
-      console.log('Sepia applied');
-    } catch (error) {
-      console.error('Sepia error:', error);
-    }
-  };
-
-  const handleWatermark = () => {
-    if (!eiip || !canvasRef.current) return;
-    try {
-      eiip.watermark(watermarkText, 50, 50, {
-        font: '30px Arial',
-        color: 'rgba(255, 255, 255, 0.5)',
+      const result = await eiip.resizeImage(currentImageURL, {
+        width: resizeWidth,
+        height: resizeHeight,
+        fit: 'fill',
+        quality: 0.9,
+        format: 'png'
       });
-      updateCanvas();
-      console.log(`Watermark added: ${watermarkText}`);
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log(`✅ Resized to ${resizeWidth}x${resizeHeight}`);
     } catch (error) {
-      console.error('Watermark error:', error);
+      console.error('❌ Resize error:', error);
+      alert('Resize failed: ' + error.message);
+    } finally {
+      setProcessing(false);
     }
   };
 
-  const handleCompress = () => {
-    if (!eiip || !canvasRef.current) return;
+  const handleRotate = async (angle) => {
+    if (!currentImageURL) return;
+    setProcessing(true);
     try {
-      const compressed = eiip.compress(compressionQuality);
-      console.log(`Compressed with quality: ${compressionQuality}`, compressed);
-      // Compression returns base64 data URL, we can display it
-      if (compressed) {
-        const img = new window.Image();
-        img.onload = () => {
-          const canvas = canvasRef.current;
-          const ctx = canvas.getContext('2d');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          const eiipInstance = new EIIP(canvas);
-          setEiip(eiipInstance);
-        };
-        img.src = compressed;
-      }
+      const degrees = angle || rotateAngle;
+      const result = await eiip.rotateImage(currentImageURL, degrees, {
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log(`✅ Rotated by ${degrees} degrees`);
     } catch (error) {
-      console.error('Compress error:', error);
+      console.error('❌ Rotate error:', error);
+      alert('Rotate failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleFlip = async (direction) => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      const result = await eiip.flipImage(currentImageURL, direction, {
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log(`✅ Flipped ${direction}`);
+    } catch (error) {
+      console.error('❌ Flip error:', error);
+      alert('Flip failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleCrop = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      const result = await eiip.cropImage(currentImageURL, {
+        x: cropX,
+        y: cropY,
+        width: cropWidth,
+        height: cropHeight
+      }, {
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log(`✅ Cropped: x=${cropX}, y=${cropY}, w=${cropWidth}, h=${cropHeight}`);
+    } catch (error) {
+      console.error('❌ Crop error:', error);
+      alert('Crop failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleAdjustColors = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      // Map our values to EIIP's color adjustment
+      const result = await eiip.adjustColors(currentImageURL, {
+        brightness: brightness / 100, // Convert to 0-1 range
+        contrast: contrast / 100,     // Convert to 0-1 range
+        saturation: saturation / 100 + 1, // Convert to 0-2 range
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log(`✅ Colors adjusted`);
+    } catch (error) {
+      console.error('❌ Color adjustment error:', error);
+      alert('Color adjustment failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleBlur = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      const intensity = blurAmount / 20; // Convert to 0-1 range
+      const result = await eiip.applyEffect(currentImageURL, 'blur', intensity, {
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log(`✅ Blur applied: ${blurAmount}`);
+    } catch (error) {
+      console.error('❌ Blur error:', error);
+      alert('Blur failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleGrayscale = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      const result = await eiip.applyEffect(currentImageURL, 'grayscale', 1.0, {
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log('✅ Grayscale applied');
+    } catch (error) {
+      console.error('❌ Grayscale error:', error);
+      alert('Grayscale failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleInvert = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      const result = await eiip.applyEffect(currentImageURL, 'invert', 1.0, {
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log('✅ Invert applied');
+    } catch (error) {
+      console.error('❌ Invert error:', error);
+      alert('Invert failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleSepia = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      const result = await eiip.applyEffect(currentImageURL, 'sepia', 1.0, {
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log('✅ Sepia applied');
+    } catch (error) {
+      console.error('❌ Sepia error:', error);
+      alert('Sepia failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleWatermark = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      const result = await eiip.addWatermark(currentImageURL, {
+        text: watermarkText,
+        position: 'top-left',
+        fontSize: 30,
+        fontFamily: 'Arial',
+        color: 'rgba(255, 255, 255, 0.5)',
+        quality: 0.9,
+        format: 'png'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log(`✅ Watermark added: ${watermarkText}`);
+    } catch (error) {
+      console.error('❌ Watermark error:', error);
+      alert('Watermark failed: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleCompress = async () => {
+    if (!currentImageURL) return;
+    setProcessing(true);
+    try {
+      const result = await eiip.compressImage(currentImageURL, {
+        quality: compressionQuality,
+        format: 'jpeg'
+      });
+      
+      setCurrentImageURL(result.dataUrl);
+      displayImageOnCanvas(result.dataUrl);
+      console.log(`✅ Compressed with quality: ${compressionQuality}`);
+    } catch (error) {
+      console.error('❌ Compress error:', error);
+      alert('Compression failed: ' + error.message);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -251,27 +331,29 @@ export default function Editor() {
     if (!canvasRef.current) return;
     try {
       const canvas = canvasRef.current;
-      const dataURL = canvas.toDataURL(`image/${format}`, format === 'jpeg' ? 0.9 : undefined);
+      const mimeType = `image/${format}`;
+      const dataURL = canvas.toDataURL(mimeType, format === 'jpeg' ? 0.9 : undefined);
       const link = document.createElement('a');
       link.download = `converted-image.${format}`;
       link.href = dataURL;
       link.click();
-      console.log(`Converted and downloaded as ${format}`);
+      console.log(`✅ Converted and downloaded as ${format}`);
     } catch (error) {
-      console.error('Convert error:', error);
+      console.error('❌ Convert error:', error);
+      alert('Conversion failed: ' + error.message);
     }
   };
 
   const handleReset = () => {
-    if (!image || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    ctx.drawImage(image, 0, 0);
-    const eiipInstance = new EIIP(canvas);
-    setEiip(eiipInstance);
-    console.log('Image reset to original');
+    if (!originalFile) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setCurrentImageURL(e.target.result);
+      setCurrentImageFile(originalFile);
+      displayImageOnCanvas(e.target.result);
+      console.log('✅ Image reset to original');
+    };
+    reader.readAsDataURL(originalFile);
   };
 
   const renderToolPanel = () => {
@@ -363,18 +445,18 @@ export default function Editor() {
               <div>
                 <label className="block text-sm font-semibold mb-2">Brightness: {brightness}</label>
                 <input type="range" value={brightness} onChange={(e) => setBrightness(Number(e.target.value))} min="-100" max="100" className="w-full" />
-                <button onClick={handleBrightness} className={`${btnClass} mt-2`}>Apply Brightness</button>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2">Contrast: {contrast}</label>
                 <input type="range" value={contrast} onChange={(e) => setContrast(Number(e.target.value))} min="-100" max="100" className="w-full" />
-                <button onClick={handleContrast} className={`${btnClass} mt-2`}>Apply Contrast</button>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2">Saturation: {saturation}</label>
                 <input type="range" value={saturation} onChange={(e) => setSaturation(Number(e.target.value))} min="-100" max="100" className="w-full" />
-                <button onClick={handleSaturation} className={`${btnClass} mt-2`}>Apply Saturation</button>
               </div>
+              <button onClick={handleAdjustColors} className={`${btnClass} mt-4`} disabled={processing}>
+                {processing ? 'Processing...' : 'Apply All Adjustments'}
+              </button>
             </div>
           </div>
         );
@@ -470,7 +552,7 @@ export default function Editor() {
           </div>
           
           <div className="flex items-center space-x-3">
-            {image && (
+            {currentImageURL && (
               <span className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold">
                 {canvasRef.current?.width || 0} × {canvasRef.current?.height || 0}
               </span>
@@ -499,17 +581,19 @@ export default function Editor() {
             </button>
             <input id="file-input" {...getInputProps()} style={{ display: 'none' }} />
             
-            {image && (
+            {currentImageURL && (
               <>
                 <button 
                   onClick={handleReset}
-                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-semibold"
+                  disabled={processing}
+                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   🔄 Reset
                 </button>
                 <button 
                   onClick={handleDownload}
-                  className="px-6 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                  disabled={processing}
+                  className="px-6 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   💾 Download
                 </button>
@@ -565,7 +649,7 @@ export default function Editor() {
 
         {/* Canvas Area */}
         <main className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-          {!image ? (
+          {!currentImageURL ? (
             <div className="text-center">
               <div className="mb-6">
                 <svg className="w-32 h-32 mx-auto text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -581,7 +665,16 @@ export default function Editor() {
             </div>
           ) : null}
           
-          <div className={`max-w-full max-h-full shadow-2xl rounded-lg overflow-hidden ${!image ? 'hidden' : ''}`}>
+          {processing && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-xl font-semibold text-gray-800">Processing...</p>
+              </div>
+            </div>
+          )}
+          
+          <div className={`max-w-full max-h-full shadow-2xl rounded-lg overflow-hidden ${!currentImageURL ? 'hidden' : ''}`}>
             <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
           </div>
         </main>
