@@ -518,5 +518,5 @@ MIT License - See LICENSE file
 
 ---
 
-**Made with ❤️ by Saleem Ahmad (Elite India)**  
+**Made with ❤️ by Saleem Ahmad (Elidia Technology Pvt Ltd)**  
 **Last Updated**: October 12, 2025

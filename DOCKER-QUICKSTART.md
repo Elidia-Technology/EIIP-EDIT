@@ -179,5 +179,5 @@ All 13 EIIP Editor tools work perfectly in Docker:
 
 ---
 
-**Made with ❤️ by Saleem Ahmad (Elite India)**  
+**Made with ❤️ by Saleem Ahmad (Elidia Technology Pvt Ltd)**  
 **Version 1.0.0** | October 12, 2025

@@ -11,7 +11,7 @@
 **EIIP Image Editor** is a full-stack web application for professional image editing, built with:
 - **Frontend**: React 18.2.0 + Tailwind CSS
 - **Backend**: Node.js + Express.js
-- **Library**: EIIP v1.2.0 (Elite India Image Processing)
+- **Library**: EIIP v1.2.0 (Elidia Technology Pvt Ltd Image Processing)
 - **Deployment**: Docker + Nginx
 
 ---
@@ -265,7 +265,7 @@
 ## 📞 Contact & Support
 
 - **Developer**: Saleem Ahmad
-- **Organization**: Elite India
+- **Organization**: Elidia Technology Pvt Ltd
 - **Library**: EIIP v1.2.0
 - **GitHub**: [SaleemLww/EIIP_EDIT](https://github.com/SaleemLww/EIIP_EDIT)
 

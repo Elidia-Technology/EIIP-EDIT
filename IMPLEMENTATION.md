@@ -1,7 +1,7 @@
 # EIIP Image Editor - Implementation Details
 
 ## Overview
-A full-stack image editor web application built with React.js frontend and Node.js/Express.js backend, properly integrating the EIIP (Elite India Image Processing) npm library.
+A full-stack image editor web application built with React.js frontend and Node.js/Express.js backend, properly integrating the EIIP (Elidia Technology Pvt Ltd Image Processing) npm library.
 
 ## Architecture
 
@@ -327,7 +327,7 @@ Use VS Code tasks or run in separate terminals
 - [ ] Set up monitoring
 
 ## Credits
-- **EIIP Library:** Saleem Ahmad (Elite India)
+- **EIIP Library:** Saleem Ahmad (Elidia Technology Pvt Ltd)
 - **Application:** Built for EIIP demonstration
 - **License:** MIT
 

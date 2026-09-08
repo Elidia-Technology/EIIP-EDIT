@@ -1,7 +1,7 @@
 # EIIP Editor - Complete Feature List
 
 ## Overview
-EIIP Editor is a professional, Photoshop-style web-based image editor built with React.js and powered by the EIIP (Elite India Image Processing) library. It provides 13 comprehensive image editing tools with an intuitive user interface.
+EIIP Editor is a professional, Photoshop-style web-based image editor built with React.js and powered by the EIIP (Elidia Technology Pvt Ltd Image Processing) library. It provides 13 comprehensive image editing tools with an intuitive user interface.
 
 ---
 
@@ -460,7 +460,7 @@ await eiip.compressImage(imageURL, { quality, format });
 
 MIT License - See LICENSE file for details
 
-**EIIP Library**: v1.2.0 by Saleem Ahmad (Elite India)
+**EIIP Library**: v1.2.0 by Saleem Ahmad (Elidia Technology Pvt Ltd)
 
 ---
 
@@ -485,4 +485,4 @@ For issues, feature requests, or questions:
 
 **Last Updated**: October 12, 2025  
 **Version**: 1.0.0  
-**Author**: Saleem Ahmad (Elite India)
+**Author**: Saleem Ahmad (Elidia Technology Pvt Ltd)

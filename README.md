@@ -1,6 +1,6 @@
 # EIIP Image Editor Web Application
 
-A professional, Photoshop-style web-based image editor built with React.js and powered by the EIIP (Elite India Image Processing) library.
+A professional, Photoshop-style web-based image editor built with React.js and powered by the EIIP (Elidia Technology Pvt Ltd Image Processing) library.
 
 ## ✨ Key Features
 
@@ -128,7 +128,7 @@ EIIP_EDIT/
 
 **Frontend**:
 - React.js 18.2.0
-- EIIP library v1.2.0 (Elite India Image Processing)
+- EIIP library v1.2.0 (Elidia Technology Pvt Ltd Image Processing)
 - Tailwind CSS v3.4.1
 - react-dropzone for file uploads
 - HTML5 Canvas API
@@ -164,10 +164,10 @@ npm start          # Start Express server
 
 ## 🌟 EIIP Library
 
-This editor is powered by the **EIIP** (Elite India Image Processing) library:
+This editor is powered by the **EIIP** (Elidia Technology Pvt Ltd Image Processing) library:
 - **Version**: 1.2.0
 - **npm**: [eiip](https://www.npmjs.com/package/eiip)
-- **Author**: Saleem Ahmad (Elite India)
+- **Author**: Saleem Ahmad (Elidia Technology Pvt Ltd)
 - **License**: MIT
 
 ### EIIP Features Used
@@ -236,7 +236,7 @@ Planned features for future versions:
 
 MIT License
 
-Copyright (c) 2025 Saleem Ahmad (Elite India)
+Copyright (c) 2025 Saleem Ahmad (Elidia Technology Pvt Ltd)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -264,7 +264,7 @@ SOFTWARE.
 
 ---
 
-**Made with ❤️ using EIIP by Saleem Ahmad (Elite India)**
+**Made with ❤️ using EIIP by Saleem Ahmad (Elidia Technology Pvt Ltd)**
 
 **Last Updated**: October 12, 2025 | **Version**: 1.0.0
 

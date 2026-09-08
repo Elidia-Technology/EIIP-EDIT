@@ -134,7 +134,7 @@ SHARPEN    →  Edge enhancement (adjustable)
 ## 📦 Powered By
 
 ```
-EIIP v1.2.0  -  Elite India Image Processing Library
+EIIP v1.2.0  -  Elidia Technology Pvt Ltd Image Processing Library
 Author: Saleem Ahmad
 npm: npmjs.com/package/eiip
 ```
@@ -166,5 +166,5 @@ npm:    npmjs.com/package/eiip
 
 ---
 
-**Made with ❤️ by Saleem Ahmad (Elite India)**  
+**Made with ❤️ by Saleem Ahmad (Elidia Technology Pvt Ltd)**  
 **Version 1.0.0** | October 12, 2025
